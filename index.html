@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+</head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 100vh; */
+  }
+
+  .card {
+    /* width: 100%; */
+    height: 100%;
+    margin-top: 20px;
+    background-color: #735DA5;
+    /* padding: 10px; */
+    justify-content: center;
+    flex-flow: wrap;
+    display: flex;
+    border-radius:15px ;
+  }
+
+  .card div {
+    margin: 10px;
+    background-color: #D3C5E5;
+    padding: 10px;
+    width: 250px;
+    border: 2px solid black;
+    border-radius: 5px;
+    color: black;
+    word-wrap: break-word;
+  }
+
+
+  .card div button {
+    background-color: #FF5E5B;
+    color: white;
+    border: none;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #735DA5;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  input[type="text"],
+  textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #735DA5;
+  }
+
+  button {
+    padding: 10px;
+    background-color: #735DA5;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #634d94;
+  }
+</style>
+
+</head>
+
+<body>
+  <div class="container">
+    <h1>Todo App</h1>
+
+    <form id="todoForm">
+      <label for="title">Title:</label>
+      <input type="text" id="title" name="title">
+
+      <label for="description">Description:</label>
+      <textarea id="description" name="description"></textarea>
+
+      <button type="submit">Add Todo</button>
+    </form>
+
+    <div class="card" id="todosList"></div>
+  </div>
+  <script>
+    // const todosList = document.getElementById('todosList');
+    // const todoForm = document.getElementById('todoForm');
+    const parentElement = document.getElementById('todosList');
+
+    function fetchTodos() {
+      fetch('http://localhost:3000/todos')
+        .then(response => response.json())
+        .then(todos => {
+          // Clear the existing todos
+          parentElement.innerHTML = '';
+
+          todos.forEach(todo => {
+            var childElemet1 = document.createElement('h3');
+            childElemet1.textContent = "Title: " + todo.title;
+
+            var childElemet2 = document.createElement('p');
+            childElemet2.textContent = "Description: " + todo.description;
+
+            var childElemet3 = document.createElement('button');
+            childElemet3.textContent = 'Delete';
+            childElemet3.onclick = function () {
+              deleteTodo(todo.id);
+            };
+
+            var todoElement = document.createElement('div');
+            todoElement.appendChild(childElemet1);
+            todoElement.appendChild(childElemet2);
+            todoElement.appendChild(childElemet3);
+
+            parentElement.appendChild(todoElement);
+          });
+        });
+    }
+    // todosList.innerHTML = '';
+    // todos.forEach(todo => {
+    //   const todoElement = document.createElement('div');
+    //   todoElement.innerHTML = `
+    //     <h3>${todo.title}</h3>
+    //     <p>${todo.description}</p>
+    //     <button onclick="deleteTodo(${todo.id})">Delete</button>
+    //   `;
+    //   todosList.appendChild(todoElement);
+    //       });
+    // }
+
+    function addTodo() {
+
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      fetch('http://localhost:3000/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ title, description })
+      })
+        .then(response => response.json())
+        .then(() => {
+          document.getElementById('title').value = '';
+          document.getElementById('description').value = '';
+          fetchTodos();
+        });
+    }
+
+    function deleteTodo(id) {
+      fetch(`http://localhost:3000/todos/${id}`, {
+        method: 'DELETE'
+      })
+        .then(() => fetchTodos());
+    }
+
+    todoForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      addTodo();
+    });
+
+    fetchTodos();
+  </script>
+</body>
+
+</html>
